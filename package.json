@@ -32,7 +32,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "export:web": "expo export --platform web",
+    "serve:web": "cd dist && python3 -m http.server 3000 --bind 0.0.0.0"
   },
   "private": true
 }
