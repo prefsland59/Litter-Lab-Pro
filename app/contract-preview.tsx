@@ -17,7 +17,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system/legacy';
+import * as FileSystem from 'expo-file-system';
 import { useAppTheme } from '../src/theme/ThemeContext';
 import { getRowsByField, insertRow } from '../src/db/database';
 import type { Buyer, Placement, Puppy, Litter, Dog } from '../src/db/schema';

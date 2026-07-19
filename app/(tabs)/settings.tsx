@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '../../src/theme/ThemeContext';
 import { getAllRows } from '../../src/db/database';
-import { writeAsStringAsync, documentDirectory } from 'expo-file-system/legacy';
+import { writeAsStringAsync, documentDirectory } from 'expo-file-system';
 import { shareAsync, isAvailableAsync } from 'expo-sharing';
 
 // All table names to export
