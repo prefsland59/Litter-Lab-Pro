@@ -18,10 +18,12 @@ export default function RootLayout() {
     // Safety timeout: if DB init doesn't complete in 3 seconds,
     // set dbReady anyway so the app renders instead of hanging.
     const timeout = setTimeout(() => {
-      if (!dbReady) {
-        console.warn('Database init timed out — proceeding without DB');
-        setDbReady(true);
-      }
+      setDbReady((prev) => {
+        if (!prev) {
+          console.warn('Database init timed out — proceeding without DB');
+        }
+        return true;
+      });
     }, 3000);
 
     initDatabase()
@@ -52,23 +54,25 @@ export default function RootLayout() {
     }
   }, [dbReady, router]);
 
-  if (!dbReady) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Image
-          source={require('../assets/logo.jpg')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <Text style={styles.appName}>Litter Lab Pro</Text>
-        <Text style={styles.subtitle}>Professional Breeding Management</Text>
-      </View>
-    );
-  }
-
+  // Always render within ThemeProvider so that PaperProvider and SafeAreaProvider
+  // are available before Slot (expo-router navigation) mounts. This prevents a
+  // boolean/string prop type mismatch when the native side receives theme or
+  // safe-area props before the providers are ready.
   return (
     <ThemeProvider>
-      <Slot />
+      {!dbReady ? (
+        <View style={styles.loadingContainer}>
+          <Image
+            source={require('../assets/logo.jpg')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text style={styles.appName}>Litter Lab Pro</Text>
+          <Text style={styles.subtitle}>Professional Breeding Management</Text>
+        </View>
+      ) : (
+        <Slot />
+      )}
     </ThemeProvider>
   );
 }
