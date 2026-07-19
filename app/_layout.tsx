@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Text, View, StyleSheet, Image } from 'react-native';
 import { Slot, useRouter } from 'expo-router';
 import { ThemeProvider } from '../src/theme/ThemeContext';
@@ -9,22 +9,41 @@ import { requestNotificationPermissions } from '../src/utils/notifications';
 export default function RootLayout() {
   const [dbReady, setDbReady] = useState(false);
   const router = useRouter();
+  const dbInitRef = useRef(false);
 
   useEffect(() => {
+    if (dbInitRef.current) return;
+    dbInitRef.current = true;
+
+    // Safety timeout: if DB init doesn't complete in 3 seconds,
+    // set dbReady anyway so the app renders instead of hanging.
+    const timeout = setTimeout(() => {
+      if (!dbReady) {
+        console.warn('Database init timed out — proceeding without DB');
+        setDbReady(true);
+      }
+    }, 3000);
+
     initDatabase()
       .then(() => setDbReady(true))
       .catch((err: unknown) => {
         console.error('Failed to initialize database:', err);
         // Proceed even on error so the app doesn't hang
         setDbReady(true);
-      });
+      })
+      .finally(() => clearTimeout(timeout));
+
+    return () => clearTimeout(timeout);
   }, []);
 
   useEffect(() => {
     if (dbReady) {
       checkFirstLaunch().then((isFirst) => {
         if (isFirst) {
-          router.replace('/privacy-disclaimer');
+          // Delay redirect slightly to ensure navigation stack is mounted
+          setTimeout(() => {
+            router.replace('/privacy-disclaimer');
+          }, 100);
         } else {
           // Request notification permissions after first launch flow
           requestNotificationPermissions();

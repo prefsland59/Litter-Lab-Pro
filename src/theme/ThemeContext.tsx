@@ -107,8 +107,22 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   // Load saved preference on mount
   useEffect(() => {
+    let timedOut = false;
+
+    // Safety timeout: if AsyncStorage doesn't resolve within 2 seconds,
+    // force loaded to true so the app never hangs on a blank screen.
+    const timeout = setTimeout(() => {
+      timedOut = true;
+      if (!loaded) {
+        const colorScheme = Appearance.getColorScheme();
+        setTheme(colorScheme === 'dark' ? 'dark' : 'light');
+        setLoaded(true);
+      }
+    }, 2000);
+
     AsyncStorage.getItem(STORAGE_KEY)
       .then((stored) => {
+        if (timedOut) return; // timeout already handled it
         if (stored === 'light' || stored === 'dark') {
           setTheme(stored);
         } else {
@@ -118,10 +132,14 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         setLoaded(true);
       })
       .catch(() => {
+        if (timedOut) return; // timeout already handled it
         const colorScheme = Appearance.getColorScheme();
         setTheme(colorScheme === 'dark' ? 'dark' : 'light');
         setLoaded(true);
-      });
+      })
+      .finally(() => clearTimeout(timeout));
+
+    return () => clearTimeout(timeout);
   }, []);
 
   const toggleTheme = useCallback(() => {
@@ -143,11 +161,9 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     [theme, toggleTheme],
   );
 
-  // Don't render until we've loaded the preference to avoid a flash
-  if (!loaded) {
-    return null;
-  }
-
+  // Always render children immediately with the default light theme.
+  // AsyncStorage preference loads async and theme will update when it resolves.
+  // This prevents a blank/frozen screen if AsyncStorage hangs.
   return (
     <ThemeContext.Provider value={contextValue}>
       <PaperProvider theme={paperTheme}>
