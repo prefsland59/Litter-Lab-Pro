@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '../../src/theme/ThemeContext';
 import { getAllRows } from '../../src/db/database';
-import { writeAsStringAsync, documentDirectory } from 'expo-file-system';
+import { writeAsStringAsync, Paths } from 'expo-file-system';
 import { shareAsync, isAvailableAsync } from 'expo-sharing';
 
 // All table names to export
@@ -69,7 +69,7 @@ export default function SettingsScreen() {
       );
 
       const filename = `litter_lab_pro_backup_${formatDate()}.json`;
-      const fileUri = documentDirectory + filename;
+      const fileUri = Paths.document.uri + filename;
 
       // Write file using expo-file-system legacy API
       await writeAsStringAsync(fileUri, jsonString, {

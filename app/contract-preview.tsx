@@ -141,7 +141,7 @@ a qualified attorney for legally binding contracts.
 
   const handleShareContract = async () => {
     try {
-      const filePath = `${FileSystem.cacheDirectory}contract.txt`;
+      const filePath = `${FileSystem.Paths.cache.uri}contract.txt`;
       await FileSystem.writeAsStringAsync(filePath, contractContent);
       const canShare = await Sharing.isAvailableAsync();
       if (canShare) {
